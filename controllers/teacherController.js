@@ -1,34 +1,93 @@
-import { Teacher } from "../models/teacherSchema.js";
-import { handleValidationError } from "../middlewares/errorHandler.js";
+// backend/controllers/teacherController.js
+const Assignment = require('../models/Assignment');
+const Exam = require('../models/Exam');
+const Attendance = require('../models/Attendance');
+const Announcement = require('../models/Announcement');
+const Course = require('../models/Course');
+const Student = require('../models/Student')
 
- export const createTeacher = async (req, res, next) => {
-  console.log(req.body);
-    const { name, email, subject } = req.body;
-    try {
-         if (!name || !email || !subject ) {
-          handleValidationError("Please Fill Full Form!", 400);
-    }
-    await Teacher.create({ name, email, subject });
-    res.status(200).json({
-      success: true,
-      message: "Teacher Created!",
-    }); 
-    } catch (err) { 
-      next(err)
-    }
-  };
-  
+// View courses
+const viewCourses = async (req, res) => {
+  try {
+    // const courses = await Course.find({ teacher: req.teacher.id });
+    const courses = await Course.find();
+    res.status(200).json(courses);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-  export const getAllTeachers = async (req, res, next) => {
-    try {
-     const teachers = await Teacher.find();
-    res.status(200).json({
-      success: true,
-      teachers,
-    });   
-    } catch (err) {
-      next(err)
-    }
-  };
-  
- 
+// view students
+const viewStudents = async (req, res) => {
+  try {
+    // const courses = await Course.find({ teacher: req.teacher.id });
+    const students = await Student.find();
+    res.status(200).json(students);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Add assignment
+const addAssignment = async (req, res) => {
+  try {
+    const assignment = new Assignment(req.body);
+    await assignment.save();
+    res.status(201).json(assignment);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+//Add Exams
+const addExams = async (req, res) => {
+  try {
+    const exams = new Exam(req.body);
+    await exams.save();
+    res.status(201).json(exams);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Manage exams
+const manageExams = async (req, res) => {
+  try {
+    // const exams = await Exam.find({ course: req.teacher.course });
+    const exams = await Exam.find();
+    res.status(200).json(exams);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Mark attendance
+const markAttendance = async (req, res) => {
+  try {
+    const attendance = new Attendance(req.body);
+    await attendance.save();
+    res.status(201).json(attendance);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Manage announcements
+const manageAnnouncements = async (req, res) => {
+  try {
+    const announcements = await Announcement.find({ teacher: req.teacher.id });
+    res.status(200).json(announcements);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  viewCourses,
+  viewStudents,
+  addExams,
+  addAssignment,
+  manageExams,
+  markAttendance,
+  manageAnnouncements,
+};

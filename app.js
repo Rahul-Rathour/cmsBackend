@@ -1,49 +1,51 @@
-import express from "express";
-import { config } from "dotenv";
-import { dbConnection } from "./database/dbConnection.js";
-import cors from "cors";
-import studentRouter from "./router/studentRouter.js";
-import teacherRouter from "./router/teacherRouter.js";
-import assignmentRouter from "./router/assignmentRouter.js";
-import announcementRouter from "./router/announcementRouter.js";
-import classRouter from "./router/classRouter.js";
-import libraryRouter from "./router/libraryRouter.js";
-import eventRouter from "./router/eventsRouter.js";
-import examRouter from "./router/examRouter.js";
-import attendanceRouter from "./router/attendanceRouter.js";
+// 26/08/2024
 
-import { errorHandler } from "./middlewares/errorHandler.js";
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+require('dotenv').config();
 
+// Import routes
+const adminRoutes = require('./routes/adminRoutes');
+const studentRoutes = require('./routes/StudentRoutes');
+const teacherRoutes = require('./routes/TeacherRoutes');
+
+// Initialize Express app
 const app = express();
-config({path: "./config/config.env"});
 
-app.use(
-    cors({
-        origin: [process.env.FRONTEND_URL],
-        methods: ["GET" , "POST", "PUT", "DELETE"],
-    })
-);
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.use((err, req, res, next) =>{
-    errorHandler(err, req, res, next)
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+
+// Serve files in the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Routes
+app.use('/api/admin', adminRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/teacher', teacherRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
 });
 
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-
-app.use("/api/vi/students",studentRouter);
-app.use("/api/vi/teachers",teacherRouter);
-app.use("/api/vi/assignments",assignmentRouter);
-app.use("/api/vi/announcements",announcementRouter);
-app.use("/api/vi/class",classRouter);
-app.use("/api/vi/library",libraryRouter);
-app.use("/api/vi/events",eventRouter);
-app.use("/api/vi/exams",examRouter);
-app.use("/api/vi/attendance",attendanceRouter);
-
-
-dbConnection();
-
-export default app;
-
-// 06:59
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
