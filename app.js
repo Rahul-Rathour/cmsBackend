@@ -1,12 +1,11 @@
-// 26/08/2024
-
+// rahul 01/09/2024 7:24
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
-
+ 
 // Import routes
 const adminRoutes = require('./routes/adminRoutes');
 const studentRoutes = require('./routes/StudentRoutes');

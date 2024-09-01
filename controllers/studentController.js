@@ -4,7 +4,8 @@ const Exam = require('../models/Exam');
 const Attendance = require('../models/Attendance');
 const Announcement = require('../models/Announcement');
 const Student = require('../models/Student');
-const JWT_SECRET = 'ASDV54@DJHDB1654651531#$3434355$#%$#%$'; // Use an environment variable for this in production
+require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET; // Use an environment variable for this in production
 const jwt = require('jsonwebtoken');
 
 // View assignments
@@ -25,8 +26,8 @@ const viewAssignments = async (req, res) => {
 // view exams
 const viewExams = async (req, res) => {
   const {course} = req.query;
-  console.log(req)
-  console.log(course)
+  // console.log(req)
+  // console.log(course)
   try {
     const exams = await Exam.find({course});
     console.log(exams)

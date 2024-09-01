@@ -6,9 +6,10 @@ const Announcement = require('../models/Announcement');
 const Exam = require('../models/Exam');
 const Event = require('../models/Event');
 const uploadFile = require('../utils/fileUpload');
+require('dotenv').config();
 
 // Add a new student
-const addStudent = async (req, res) => {
+const addStudent = async (req, res) => { 
   try {
     const student = new Student(req.body);
     await student.save();
@@ -29,6 +30,7 @@ const addTeacher = async (req, res) => {
   }
 };
 
+
 // Add a new course
 const addCourse = async (req, res) => {
   try {
@@ -43,11 +45,19 @@ const addCourse = async (req, res) => {
 // Add an announcement with PDF
 const addAnnouncement = async (req, res) => {
   try {
-    const pdfPath = await uploadFile(req.file);
-    const announcement = new Announcement({ ...req.body, pdf: pdfPath });
-    await announcement.save();
-    res.status(201).json(announcement);
-  } catch (error) {
+    const { title, description } = req.body;
+    const pdf = req.file ? req.file.filename : null;
+
+    const newAnnouncement = new Announcement({
+      title,
+      description,
+      pdf
+    });
+
+    await newAnnouncement.save();
+    res.status(201).json({ message: 'Announcement created successfully', announcement: newAnnouncement });
+  }
+  catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
@@ -76,10 +86,10 @@ const addEvent = async (req, res) => {
 
 // controllers/authController.js
 // const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'); 
 // const User = require('../models/User');
 
-const JWT_SECRET = 'ASDV54@DJHDB1654651531#$3434355$#%$#%$'; // Use an environment variable for this in production
+const JWT_SECRET = process.env.JWT_SECRET;  // Use an environment variable for this in production
 
 // Register User
 // const register = async (req, res) => {
@@ -101,8 +111,8 @@ const AdminLogin = async (req, res) => {
   const AdminPassword = "Admin@123";
   try {
     // const user = await User.findOne({ username });
-    if (AdminName == username && AdminPassword == password) {
-      const token = jwt.sign({ name: username}, JWT_SECRET, { expiresIn: '1h' });
+    if (username == AdminName && password == AdminPassword) {
+      const token = jwt.sign({ name: username }, JWT_SECRET, { expiresIn: '1h' });
       res.json({ token });
     } else {
       res.status(401).send('Invalid credentials');

@@ -1,10 +1,32 @@
 // backend/controllers/teacherController.js
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'ASDV54@DJHDB1654651531#$3434355$#%$#%$'; 
 const Assignment = require('../models/Assignment');
 const Exam = require('../models/Exam');
 const Attendance = require('../models/Attendance');
 const Announcement = require('../models/Announcement');
 const Course = require('../models/Course');
-const Student = require('../models/Student')
+const faculty = require('../models/Teacher')
+
+
+const FacultyLogin = async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+    const FacultyDetail = await faculty.find({ empid:password });
+    // console.log(FacultyDetail);
+    if (FacultyDetail) {
+      const token = jwt.sign({ name: FacultyDetail.name}, JWT_SECRET, { expiresIn: '1h' });
+      if (FacultyDetail && FacultyDetail.length > 0) {
+        res.json({ token: token, FacultyDetail: FacultyDetail[0] });
+    }
+    } else {
+      res.status(401).send('Invalid credentials');
+    }
+  } catch (error) {
+    res.status(500).send('Error logging in');
+  }
+};
 
 // View courses
 const viewCourses = async (req, res) => {
@@ -82,6 +104,25 @@ const manageAnnouncements = async (req, res) => {
   }
 };
 
+// Create a new Announcement
+const createAnnouncement = async (req, res) => {
+  const { title, description, pdf } = req.body;
+
+  try {
+    const newAnnouncement = new Announcement({
+      title,
+      description,
+      pdf,
+      teacher: req.teacher.id, // Assuming the schema has a `teacher` field to store the teacher's ID
+    });
+
+    await newAnnouncement.save();
+    res.status(201).json({ success: true, announcement: newAnnouncement });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   viewCourses,
   viewStudents,
@@ -90,4 +131,5 @@ module.exports = {
   manageExams,
   markAttendance,
   manageAnnouncements,
+  FacultyLogin,
 };

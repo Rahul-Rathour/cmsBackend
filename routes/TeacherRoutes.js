@@ -7,7 +7,7 @@ const {
   manageExams,
   markAttendance,
   manageAnnouncements,
-  addExams,
+  addExams,FacultyLogin,
 } = require('../controllers/teacherController');
 const router = express.Router();
 
@@ -18,5 +18,6 @@ router.get('/exams', manageExams);
 router.get('/add-exam', addExams);
 router.post('/mark-attendance', markAttendance);
 router.get('/announcements', manageAnnouncements);
+router.post('/login', FacultyLogin);
 
 module.exports = router;
